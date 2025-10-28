@@ -1,0 +1,49 @@
+@startuml
+title FPS-RPG — Class Diagram (summary)
+package creational {
+  class CharacterFactory
+  abstract class PlayerCharacter
+  class Assault
+  class Sniper
+  class Engineer
+  class Enemy
+}
+package structural {
+  interface Weapon
+  class BaseRifle
+  abstract class WeaponDecorator
+  class ScopeAttachment
+  class ExtendedMagAttachment
+  class SilencerAttachment
+}
+package behavioral {
+  interface AttackStrategy
+  class HipFireStrategy
+  class AimStrategy
+  class SuppressiveStrategy
+}
+package game {
+  class GameManager
+  class CombatSystem
+}
+
+CharacterFactory ..> PlayerCharacter : creates
+CharacterFactory ..> Enemy : creates
+
+BaseRifle ..|> Weapon
+WeaponDecorator ..|> Weapon
+WeaponDecorator --> Weapon : wrap
+ScopeAttachment -|> WeaponDecorator
+ExtendedMagAttachment -|> WeaponDecorator
+SilencerAttachment -|> WeaponDecorator
+
+CombatSystem --> AttackStrategy : uses
+AttackStrategy <|-- HipFireStrategy
+AttackStrategy <|-- AimStrategy
+AttackStrategy <|-- SuppressiveStrategy
+CombatSystem --> PlayerCharacter
+CombatSystem --> Enemy
+GameManager --> CharacterFactory
+GameManager --> CombatSystem
+
+@enduml
