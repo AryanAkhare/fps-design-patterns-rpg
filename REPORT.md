@@ -40,7 +40,6 @@ fps_rpg/
   - AttackStrategy.java — Strategy interface
   - HipFireStrategy.java, AimStrategy.java, SuppressiveStrategy.java — concrete strategies
 - report/
-  - REPORT.md (this file)
   - diagrams/
     - class_diagram.png
     - sequence_combat.png
