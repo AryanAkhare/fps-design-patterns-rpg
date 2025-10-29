@@ -1,0 +1,71 @@
+@startuml
+title FPS-RPG - Class Diagram (Design Patterns)
+
+package creational {
+  class CharacterFactory {
+    +registerPlayer(key, creator)
+    +registerEnemy(key, creator)
+    +createPlayer(type,name)
+    +createEnemy(type)
+  }
+  class PlayerCharacter
+  class Assault
+  class Sniper
+  class Engineer
+  class Enemy
+  PlayerCharacter <|-- Assault
+  PlayerCharacter <|-- Sniper
+  PlayerCharacter <|-- Engineer
+}
+
+package structural {
+  interface Weapon
+  interface Reloadable
+  class BaseRifle
+  abstract class WeaponDecorator
+  class ScopeAttachment
+  class ExtendedMagAttachment
+  class SilencerAttachment
+  Weapon <|.. BaseRifle
+  Reloadable <|.. BaseRifle
+  Weapon <|.. WeaponDecorator
+  WeaponDecorator <|-- ScopeAttachment
+  WeaponDecorator <|-- ExtendedMagAttachment
+  WeaponDecorator <|-- SilencerAttachment
+}
+
+package behavioral {
+  interface AttackStrategy
+  interface AttackStrategyProvider
+  class HipFireStrategy
+  class AimStrategy
+  class SuppressiveStrategy
+  AttackStrategy <|.. HipFireStrategy
+  AttackStrategy <|.. AimStrategy
+  AttackStrategy <|.. SuppressiveStrategy
+}
+
+package game {
+  class GameManager
+  class CombatSystem
+  interface ConsoleIO
+  class ConsoleConsoleIO
+  class DefaultAttackStrategyProvider
+  CombatSystem --> "AttackStrategyProvider" : uses
+  GameManager --> CombatSystem : uses
+  GameManager --> CharacterFactory : creates players/enemies
+  CombatSystem --> ConsoleIO
+  ConsoleConsoleIO ..|> ConsoleIO
+}
+
+CharacterFactory ..> PlayerCharacter : creates
+CharacterFactory ..> Enemy : creates
+PlayerCharacter --> Weapon : equips
+Enemy --> PlayerCharacter : attacks
+
+note top: Patterns:
+- Factory (CharacterFactory)
+- Decorator (Weapon + WeaponDecorator)
+- Strategy (AttackStrategy + concrete strategies)
+
+@enduml

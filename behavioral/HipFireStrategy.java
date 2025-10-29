@@ -7,7 +7,7 @@ public class HipFireStrategy implements AttackStrategy {
     @Override
     public boolean attack(PlayerCharacter player, Enemy enemy) {
         // hip-fire: no extra accuracy, full attack
-        if (!player.getWeapon().consumeBullet()) { System.out.println("Click! No ammo. Reload."); return false; }
+    if (!player.getReloadableWeapon().consumeBullet()) { System.out.println("Click! No ammo. Reload."); return false; }
         int dmg = player.getAttackPower();
         System.out.println(player.getName() + " hip-fires for " + dmg + " raw damage.");
         enemy.takeDamage(dmg);

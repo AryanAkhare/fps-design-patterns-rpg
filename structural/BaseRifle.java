@@ -1,6 +1,6 @@
 package fps_rpg.structural;
 
-public class BaseRifle implements Weapon {
+public class BaseRifle implements Weapon, Reloadable {
     private String name;
     private int bonusDamage;
     private int maxAmmo;
@@ -14,6 +14,8 @@ public class BaseRifle implements Weapon {
     @Override public int getBonusDamage() { return bonusDamage; }
     @Override public int getBonusDefense() { return 0; }
     @Override public double getBonusAccuracy() { return 0.0; }
+
+    // Reloadable
     @Override public boolean consumeBullet() { if (maxAmmo<=0) return true; if (ammoInMag<=0) return false; ammoInMag--; return true; }
     @Override public void reload() { ammoInMag = maxAmmo; }
     @Override public int getAmmoInMag() { return ammoInMag; }

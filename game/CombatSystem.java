@@ -2,42 +2,56 @@ package fps_rpg.game;
 
 import fps_rpg.creational.*;
 import fps_rpg.behavioral.*;
-import java.util.Scanner;
 
+/**
+ * Combat engine separated from IO. Uses injected ConsoleIO and a default AttackStrategy.
+ */
 public class CombatSystem {
-    private Scanner scanner;
-    public CombatSystem(Scanner scanner) { this.scanner = scanner; }
+    private final ConsoleIO io;
+    private final AttackStrategy defaultStrategy;
+    private final fps_rpg.behavioral.AttackStrategyProvider strategyProvider;
+
+    public CombatSystem(ConsoleIO io, fps_rpg.behavioral.AttackStrategyProvider strategyProvider, AttackStrategy defaultStrategy) {
+        this.io = io;
+        this.strategyProvider = strategyProvider;
+        this.defaultStrategy = defaultStrategy;
+    }
 
     public void startCombat(PlayerCharacter player, Enemy enemy) {
-        System.out.println("\n=== COMBAT STARTED ===");
+        io.println("\n=== COMBAT STARTED ===");
         enemy.displayInfo();
-        AttackStrategy currentStrategy = new HipFireStrategy();
+        AttackStrategy currentStrategy = defaultStrategy;
 
         while (player.isAlive() && enemy.isAlive()) {
-            System.out.println("\nPlayer HP: " + player.getHealth() + "/" + player.getMaxHealth());
-            System.out.println("Enemy HP: " + enemy.getHealth());
-            System.out.println("Actions: 1) Shoot  2) Aim  3) Suppressive  4) Reload  5) Status");
-            System.out.print("Choice: ");
+            io.println("\nPlayer HP: " + player.getHealth() + "/" + player.getMaxHealth());
+            io.println("Enemy HP: " + enemy.getHealth());
+            // build menu from provider
+            StringBuilder menu = new StringBuilder("Actions: ");
+            for (var e : strategyProvider.getMenuOptions().entrySet()) {
+                menu.append(e.getKey()).append(") ").append(e.getValue()).append("  ");
+            }
+            menu.append("4) Reload  5) Status");
+            io.println(menu.toString());
+            io.print("Choice: ");
             int choice = 1;
-            try { choice = Integer.parseInt(scanner.nextLine().trim()); } catch (Exception e) {}
+            try { choice = Integer.parseInt(io.readLine().trim()); } catch (Exception e) { }
 
             switch (choice) {
-                case 2: currentStrategy = new AimStrategy(); break;
-                case 3: currentStrategy = new SuppressiveStrategy(); break;
-                case 4: player.getWeapon().reload(); System.out.println("Reloaded."); break;
+                case 4: player.getReloadableWeapon().reload(); io.println("Reloaded."); break;
                 case 5: player.displayStats(); enemy.displayInfo(); break;
                 default:
-                    // shoot using selected strategy
+                    // ask provider for a strategy if the choice matches a strategy option
+                    currentStrategy = strategyProvider.getStrategyForChoice(choice, currentStrategy);
                     boolean fired = currentStrategy.attack(player, enemy);
                     if (!fired) { /* no ammo */ }
             }
 
-            if (!enemy.isAlive()) { System.out.println("Enemy defeated!"); break; }
+            if (!enemy.isAlive()) { io.println("Enemy defeated!"); break; }
 
             // enemy turn
             int ed = enemy.getAttackPower();
             player.takeDamage(ed);
-            System.out.println(enemy.getName() + " hits you for " + Math.max(0, ed - player.getDefense()) + " damage.");
+            io.println(enemy.getName() + " hits you for " + Math.max(0, ed - player.getDefense()) + " damage.");
         }
     }
 }

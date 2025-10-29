@@ -1,0 +1,35 @@
+@startuml
+title FPS-RPG - Player Turn Sequence
+
+actor User
+participant "GameManager" as GM
+participant "CombatSystem" as CS
+participant "ConsoleIO" as IO
+participant "PlayerCharacter" as Player
+participant "AttackStrategyProvider" as Provider
+participant "AttackStrategy" as Strategy
+participant "Weapon" as Weapon
+participant "Enemy" as Enemy
+
+User -> GM: start()
+GM -> CS: startCombat(Player, Enemy)
+CS -> IO: println(status)
+IO -> User: display options
+User -> IO: input(choice)
+IO -> CS: return choice
+alt choice == Shoot
+  CS -> Provider: getStrategyForChoice(choice)
+  Provider -> CS: Strategy
+  CS -> Strategy: attack(Player, Enemy)
+  Strategy -> Weapon: consumeBullet()
+  Weapon --> Strategy: consumed? (true/false)
+  Strategy -> Enemy: takeDamage(dmg)
+else choice == Reload
+  CS -> Weapon: reload()
+  Weapon --> CS: reloaded
+end
+CS -> Enemy: enemyAttack()
+Enemy -> Player: takeDamage(dmg)
+CS -> GM: combatLoopContinue/finish
+
+@enduml

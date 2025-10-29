@@ -3,57 +3,67 @@ package fps_rpg.game;
 import fps_rpg.creational.*;
 import fps_rpg.structural.*;
 import fps_rpg.behavioral.*;
-import java.util.Scanner;
 
 public class GameManager {
-    private Scanner scanner = new Scanner(System.in);
+    private final ConsoleIO io;
+    private final CharacterFactory factory;
     private PlayerCharacter player;
+
+    public GameManager() {
+        this(new ConsoleConsoleIO(), new CharacterFactory());
+    }
+
+    public GameManager(ConsoleIO io, CharacterFactory factory) {
+        this.io = io;
+        this.factory = factory;
+    }
 
     public void start() {
         displayWelcome();
         createPlayer();
         equipWeapon();
-        CombatSystem combat = new CombatSystem(scanner);
+    // inject a default strategy (HipFire) and strategy provider into CombatSystem
+    CombatSystem combat = new CombatSystem(io, new fps_rpg.behavioral.DefaultAttackStrategyProvider(), new HipFireStrategy());
 
         // First encounter
-        System.out.println("\n--- Encounter: Grunt ---");
-        Enemy grunt = CharacterFactory.createEnemy("grunt");
+        io.println("\n--- Encounter: Grunt ---");
+        Enemy grunt = factory.createEnemy("grunt");
         combat.startCombat(player, grunt);
 
-        if (!player.isAlive()) { System.out.println("You died. Game over."); return; }
+        if (!player.isAlive()) { io.println("You died. Game over."); return; }
 
         // Boss encounter
-        System.out.println("\n--- Encounter: Mech ---");
-        Enemy mech = CharacterFactory.createEnemy("mech");
+        io.println("\n--- Encounter: Mech ---");
+        Enemy mech = factory.createEnemy("mech");
         combat.startCombat(player, mech);
 
-        if (player.isAlive()) System.out.println("\nMission Complete! You survived the demo.");
+        if (player.isAlive()) io.println("\nMission Complete! You survived the demo.");
     }
 
     private void displayWelcome() {
-        System.out.println("=== FPS-RPG CLI Demo — Factory/Decorator/Strategy ===\n");
+        io.println("=== FPS-RPG CLI Demo — Factory/Decorator/Strategy ===\n");
     }
 
     private void createPlayer() {
-        System.out.print("Enter your name: ");
-        String name = scanner.nextLine().trim();
-        System.out.println("Choose class: 1) Assault  2) Sniper  3) Engineer");
-        System.out.print("Choice: ");
+        io.print("Enter your name: ");
+        String name = io.readLine().trim();
+        io.println("Choose class: 1) Assault  2) Sniper  3) Engineer");
+        io.print("Choice: ");
         int c = 1;
-        try { c = Integer.parseInt(scanner.nextLine().trim()); } catch (Exception e) {}
+        try { c = Integer.parseInt(io.readLine().trim()); } catch (Exception e) {}
         String type = switch (c) { case 2 -> "sniper"; case 3 -> "engineer"; default -> "assault"; };
-        player = CharacterFactory.createPlayer(type, name.isEmpty() ? "Player" : name);
+        player = factory.createPlayer(type, name.isEmpty() ? "Player" : name);
         player.displayStats();
     }
 
     private void equipWeapon() {
-        System.out.println("\nYou are given a base rifle.");
+        io.println("\nYou are given a base rifle.");
         Weapon rifle = new BaseRifle("AR-1", 10, 30);
-        System.out.print("Add Scope? (y/n): "); if (scanner.nextLine().trim().equalsIgnoreCase("y")) rifle = new ScopeAttachment(rifle);
-        System.out.print("Add Extended Mag? (y/n): "); if (scanner.nextLine().trim().equalsIgnoreCase("y")) rifle = new ExtendedMagAttachment(rifle);
-        System.out.print("Add Silencer? (y/n): "); if (scanner.nextLine().trim().equalsIgnoreCase("y")) rifle = new SilencerAttachment(rifle);
+        io.print("Add Scope? (y/n): "); if (io.readLine().trim().equalsIgnoreCase("y")) rifle = new ScopeAttachment(rifle);
+        io.print("Add Extended Mag? (y/n): "); if (io.readLine().trim().equalsIgnoreCase("y")) rifle = new ExtendedMagAttachment(rifle);
+        io.print("Add Silencer? (y/n): "); if (io.readLine().trim().equalsIgnoreCase("y")) rifle = new SilencerAttachment(rifle);
         player.equip(rifle);
-        System.out.println("Equipped -> " + rifle.getDescription());
+        io.println("Equipped -> " + rifle.getDescription());
         player.displayStats();
     }
 }

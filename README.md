@@ -12,6 +12,16 @@ This project is a small CLI-based FPS-inspired RPG demonstrating three design pa
 
 The demo lives under `fps_rpg/` and is intentionally compact to make the design patterns clear for educational / assignment use.
 
+### Recent refactor (SOLID improvements)
+
+This version includes a small refactor to better follow SOLID principles while preserving the original demo behavior:
+
+- Single Responsibility (S): console I/O was separated from game logic by adding a `ConsoleIO` abstraction (`fps_rpg/game/ConsoleIO.java`) and the runtime implementation `ConsoleConsoleIO`.
+- Open/Closed (O): `CharacterFactory` was converted from a static switch-based factory to a registry-based instance factory. You can now register new player/enemy creators with `registerPlayer` / `registerEnemy` without modifying factory internals.
+- Dependency Inversion (D): `GameManager` and `CombatSystem` now accept abstractions (ConsoleIO, CharacterFactory instance, AttackStrategy) via constructors instead of instantiating concrete classes inline.
+
+These changes make the code easier to extend and to test (for example, inject a test `ConsoleIO` to drive automated flows).
+
 ## 2. Goals and scope
 
 - Provide a runnable demo that compiles with `javac` and runs with `java`.
